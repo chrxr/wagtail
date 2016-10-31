@@ -315,7 +315,7 @@ def paginate(context, page, base_url='', page_key=DEFAULT_PAGE_KEY,
 def page_listing_buttons(context, page, page_perms, is_parent=False):
     button_hooks = hooks.get_hooks('register_page_listing_buttons')
     buttons = sorted(itertools.chain.from_iterable(
-        hook(page, page_perms, is_parent)
+        hook(context, page, page_perms, is_parent)
         for hook in button_hooks))
     return {'page': page, 'buttons': buttons}
 

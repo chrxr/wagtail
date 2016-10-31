@@ -65,7 +65,7 @@ def register_collections_menu_item():
 
 
 @hooks.register('register_page_listing_buttons')
-def page_listing_buttons(page, page_perms, is_parent=False):
+def page_listing_buttons(context, page, page_perms, is_parent=False):
     if page_perms.can_edit():
         yield PageListingButton(_('Edit'), reverse('wagtailadmin_pages:edit', args=[page.id]),
                                 attrs={'title': _('Edit this page')}, priority=10)
@@ -88,11 +88,13 @@ def page_listing_buttons(page, page_perms, is_parent=False):
         page=page,
         page_perms=page_perms,
         is_parent=is_parent,
+        context=context,
         attrs={'target': '_blank', 'title': _('View more options')}, priority=50)
 
 
 @hooks.register('register_page_listing_more_buttons')
-def page_listing_more_buttons(page, page_perms, is_parent=False):
+def page_listing_more_buttons(page, page_perms, context, is_parent=False):
+    next_url=context.request.get_full_path()
     if page_perms.can_move():
         yield Button(_('Move'), reverse('wagtailadmin_pages:move', args=[page.id]),
                      attrs={"title": _('Move this page')}, priority=10)
@@ -101,7 +103,7 @@ def page_listing_more_buttons(page, page_perms, is_parent=False):
                      attrs={'title': _('Copy this page')}, priority=20)
     if page_perms.can_delete():
         yield Button(_('Delete'), reverse('wagtailadmin_pages:delete', args=[page.id]),
-                     attrs={'title': _('Delete this page')}, priority=30)
+                     attrs={'title': _('Delete this page')}, next_url=next_url, priority=30)
     if page_perms.can_unpublish():
         yield Button(_('Unpublish'), reverse('wagtailadmin_pages:unpublish', args=[page.id]),
                      attrs={'title': _('Unpublish this page')}, priority=40)
