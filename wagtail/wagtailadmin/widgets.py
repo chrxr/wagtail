@@ -191,12 +191,14 @@ class AdminPageChooser(AdminChooser):
 @python_2_unicode_compatible
 @total_ordering
 class Button(object):
-    def __init__(self, label, url, classes=set(), attrs={}, priority=1000):
+    def __init__(self, label, url, classes=set(), attrs={}, next_url=None, priority=1000):
         self.label = label
         self.url = url
         self.classes = classes
         self.attrs = attrs.copy()
         self.priority = priority
+        if next_url is not None:
+            self.next_url = next_url
 
     def render(self):
         attrs = {'href': self.url, 'class': ' '.join(sorted(self.classes))}
@@ -248,16 +250,17 @@ class BaseDropdownMenuButton(Button):
 class ButtonWithDropdownFromHook(BaseDropdownMenuButton):
     template_name = 'wagtailadmin/pages/listing/_button_with_dropdown.html'
 
-    def __init__(self, label, hook_name, page, page_perms, is_parent, **kwargs):
+    def __init__(self, label, hook_name, page, page_perms, is_parent, context, **kwargs):
         self.hook_name = hook_name
         self.page = page
         self.page_perms = page_perms
         self.is_parent = is_parent
+        self.context = context
 
         super(ButtonWithDropdownFromHook, self).__init__(label, **kwargs)
 
     def get_buttons_in_dropdown(self):
         button_hooks = hooks.get_hooks(self.hook_name)
         return sorted(itertools.chain.from_iterable(
-            hook(self.page, self.page_perms, self.is_parent)
+            hook(self.page, self.page_perms, self.context, self.is_parent, )
             for hook in button_hooks))
